@@ -4,7 +4,7 @@ import requests
 import os
 import tensorflow as tf
 import numpy as np
-from config import idparkir, model, modelyolo, class_names, api, ultrasonic, servo, temp_directory, apientry
+from config import idparkir, model, modelyolo, class_names, ultrasonic, servo, temp_directory, apientry
     
 #open gate
 def open_gate():
