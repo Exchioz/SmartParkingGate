@@ -28,8 +28,8 @@ In the "Smart Parking Gate" project, the system is specifically engineered to ha
 
 ## System Environment
 To fully utilize the Smart Parking Gate system, users are required to engage with our dedicated Android application, specifically designed for comprehensive gate management and enhanced user interaction. This application facilitates an intuitive platform where users can reserve parking spaces.
-- [Android App Repository](https://github.com/Exchioz/Indonesian-License-Plates)
-- [API Server Repository](https://github.com/Exchioz/Indonesian-License-Plates)
+- [Android App Repository](https://github.com/Exchioz/SmartParkingAndroid)
+- [API Server Repository](https://github.com/Exchioz/SmartParkingAPI)
 
 
 ## Installation
