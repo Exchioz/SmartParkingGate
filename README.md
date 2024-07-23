@@ -1,4 +1,4 @@
-# Smart Parking Gate
+# Smart Parking Gate using Raspberry Pi
 
 This project implements a Indonesian vehicle license plate recognition system using a Raspberry Pi. It utilizes advanced machine learning models to detect and recognize license plates, and controls a servo motor for gate management based on the presence of authorized vehicles. The system uses an ultrasonic sensor to detect vehicle presence and distance.
 
