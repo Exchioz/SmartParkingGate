@@ -10,7 +10,8 @@ servo_pin = 12
 #change this to your own parking id
 idparkir = 2
 #change this to your own api url
-api = "http://localhost:5000/"
+apientry = "http://localhost:5000/checkIn"
+apiexit = "http://localhost:5000/checkOut"
 
 factory = PiGPIOFactory()
 ultrasonic = DistanceSensor(echo=echo_pin, trigger=trigger_pin)

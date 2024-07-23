@@ -4,7 +4,7 @@ import requests
 import os
 import tensorflow as tf
 import numpy as np
-from config import idparkir, model, modelyolo, class_names, api, ultrasonic, servo, temp_directory
+from config import idparkir, model, modelyolo, class_names, api, ultrasonic, servo, temp_directory, apientry
     
 #open gate
 def open_gate():
@@ -32,7 +32,7 @@ def open_gate():
 #validation plate number to api
 def send_to_api(text_ocr):
     try:
-        response = requests.post(f"{api}checkIn", json={"idParkir": idparkir, "plateNumber": text_ocr})
+        response = requests.post(apientry, json={"idParkir": idparkir, "plateNumber": text_ocr})
         print(response.text)
         if response.status_code == 200:
             print("Berhasil masuk")
