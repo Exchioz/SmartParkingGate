@@ -1,24 +1,12 @@
 import time
 import cv2
 import requests
+import os
 import tensorflow as tf
 import numpy as np
-from ultralytics import YOLO
-from gpiozero import DistanceSensor, Servo
-from gpiozero.pins.pigpio import PiGPIOFactory
-from config import idparkir, model, modelyolo, class_names, api
-
-#pin
-echo_pin = 24
-trigger_pin = 23
-servo_pin = 12
-
-#setup sensor
-factory = PiGPIOFactory()
-ultrasonic = DistanceSensor(echo=echo_pin, trigger=trigger_pin)
-servo = Servo(servo_pin, pin_factory=factory)
+from config import idparkir, model, modelyolo, class_names, api, ultrasonic, servo, temp_directory
     
-#buka gerbang
+#open gate
 def open_gate():
     while True:
         distance = ultrasonic.distance * 100
@@ -41,7 +29,7 @@ def open_gate():
 
         time.sleep(1)
         
-#cek validasi plat nomor
+#validation plate number to api
 def send_to_api(text_ocr):
     try:
         response = requests.post(f"{api}checkIn", json={"idParkir": idparkir, "plateNumber": text_ocr})
@@ -56,7 +44,7 @@ def send_to_api(text_ocr):
         
     platedetection()
 
-#deteksi plat
+#plate detection
 def platedetection():
     cap = cv2.VideoCapture(0)
     cap.set(3,480)
@@ -95,7 +83,7 @@ def platedetection():
 
                     if elapsed_time > 3:
                         cropped_image = frame[box[1]:box[3], box[0]:box[2]]
-                        image_path = "temp/cropped_image.jpg"
+                        image_path = f"{temp_directory}/cropped_image.jpg"
                         cv2.imwrite(image_path, cropped_image)
                         print(f"Cropped image for ID {id} saved successfully!")
                         active_id = None
@@ -111,7 +99,7 @@ def platedetection():
     cap.release()
     cv2.destroyAllWindows()
     
-#preprocessing gambar
+#preprocessing image
 def preprocess_image(image_path):
     img = cv2.imread(image_path)
     img = cv2.resize(img, (40, 40))
@@ -123,7 +111,7 @@ def preprocess_image(image_path):
 
     return img_array
 
-#prediksi karakter pada kontur
+#predict character
 def predict_char(img_array):
     char_list = list(class_names)
     predictions = model.predict(img_array)
@@ -132,7 +120,7 @@ def predict_char(img_array):
     
     return predicted_class_name
 
-#segmentasi dengan contour dengan jarak tertentu
+#segment character with contour
 def segment_characters(image_path):
     img_plate_gray = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     img_plate_gray = cv2.resize(img_plate_gray, (333, 75))
@@ -174,7 +162,10 @@ def segment_characters(image_path):
 
     img_plate_thresh = cv2.cvtColor(img_plate_bw, cv2.COLOR_GRAY2BGR)
 
-    ocr_results = []
+    char_extraction = []
+
+    if not os.path.exists(temp_directory):
+        os.makedirs(temp_directory)
 
     for idx, char_idx in enumerate(index_chars_sorted):
         x, y, w, h = cv2.boundingRect(contours_plate[char_idx])
@@ -188,17 +179,18 @@ def segment_characters(image_path):
 
         character_crop = img_plate_bw[y:y+h, x:x+w]
 
-        char_img = f"temp/char_{idx+1}.jpg"
+        char_img = f"{temp_directory}/char_{idx+1}.jpg"
         cv2.imwrite(char_img, character_crop)
 
         input_image = preprocess_image(char_img)
     
         text = predict_char(input_image)
-        ocr_results.append(text)
+        char_extraction.append(text)
         
-    platenumber = ''.join(ocr_results)
+    platenumber = ''.join(char_extraction)
     print('Plat Nomor:'+platenumber)
     send_to_api(platenumber)
 
+#run
 servo.max()
 platedetection()
